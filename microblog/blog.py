@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from core.db import get_db
+from core.db import get_db_session
 from . import service
 from .schemas import PostCreate, PostList
 from sqlalchemy.exc import IntegrityError
@@ -15,7 +15,7 @@ router = APIRouter()
 #     return service.get_post_list(db)
 
 @router.get('/', response_model=List[PostList])
-async def post_list(db: Session = Depends(get_db)):
+async def post_list(db: Session = Depends(get_db_session)):
     return await service.get_async_post_list(db)
 
 # @router.post('/')
@@ -23,7 +23,7 @@ async def post_list(db: Session = Depends(get_db)):
 #     return service.create_post(db, item)
 
 @router.post('/')
-async def post_list(item: PostCreate, db: Session = Depends(get_db)):
+async def post_list(item: PostCreate, db: Session = Depends(get_db_session)):
     post = service.create_post_async(db, item)
     try:
         await db.commit()
