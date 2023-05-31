@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
 from core.db import Base
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from .exceptions import DuplicatedEntryError
@@ -44,3 +44,15 @@ class Post(Base):
             await session.rollback()
             raise DuplicatedEntryError("The post is already stored")
         return new_post
+
+    @classmethod
+    def create_post(db: Session, item: PostCreate):  # для синхронной
+        post = Post(**item.dict())
+        db.add(post)
+        db.commit()
+        db.refresh(post)
+        return post
+
+    @classmethod
+    def get_post_list(db: Session):  # для синхронной
+        return db.query(Post).all()
