@@ -21,7 +21,7 @@ async def post_list(db: AsyncSession = Depends(get_db_session)):
 # def post_list(item: PostCreate, db: Session = Depends(get_db)):
 #     return service.create_post(db, item)
 
-@router.post('/post')
+@router.post('/post', response_model=PostList)
 async def create_post(item: PostCreate, db: AsyncSession = Depends(get_db_session)):
     posts = await Post.create(db, item)
     return posts

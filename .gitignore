@@ -1,3 +1,7 @@
 venv
 .idea
 idea
+microblog/__pycache__/
+core/__pycache__/
+__pycache__/
+user/__pycache__/

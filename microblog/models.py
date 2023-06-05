@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship, Session
@@ -15,7 +16,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True, index=True, unique=True)
     title = Column(String)
     text = Column(String(350))
-    date = Column(DateTime)
+    date = Column(DateTime,  index=True, default=datetime.utcnow)
     user = Column(Integer, ForeignKey("user.id"))
     user_id = relationship(User)
 
@@ -29,8 +30,7 @@ class Post(Base):
 
     @classmethod
     async def get_all(cls, session: AsyncSession):
-        result = await session.execute(select(Post))
-        return result.scalars().all()
+        return (await session.execute(select(Post))).scalars().all()
 
     @classmethod
     async def create(cls, session: AsyncSession, item: PostCreate):
@@ -45,14 +45,14 @@ class Post(Base):
             raise DuplicatedEntryError("The post is already stored")
         return new_post
 
-    @classmethod
-    def create_post(db: Session, item: PostCreate):  # для синхронной
-        post = Post(**item.dict())
-        db.add(post)
-        db.commit()
-        db.refresh(post)
-        return post
-
-    @classmethod
-    def get_post_list(db: Session):  # для синхронной
-        return db.query(Post).all()
+    # @classmethod
+    # def create_post(db: Session, item: PostCreate):  # для синхронной
+    #     post = Post(**item.dict())
+    #     db.add(post)
+    #     db.commit()
+    #     db.refresh(post)
+    #     return post
+    #
+    # @classmethod
+    # def get_post_list(db: Session):  # для синхронной
+    #     return db.query(Post).all()
