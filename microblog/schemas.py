@@ -14,11 +14,11 @@ class PostList(PostBase):
     class Config:
         orm_mode = True
 
-    @validator("date", pre=True)
-    def dt_validate(cls, date):
-        date = parse_datetime(date)
-        date = date.replace(tzinfo=None)
-        return date
+    # @validator("date", pre=True)
+    # def dt_validate(cls, date):
+    #     date = parse_datetime(date)
+    #     date = date.replace(tzinfo=None)
+    #     return date
 
 
 
