@@ -1,6 +1,11 @@
+from typing import List
+
 from pydantic import BaseModel, validator
 from datetime import datetime
 from pydantic.datetime_parse import parse_datetime
+from sqlalchemy.orm import Relationship
+
+from user.schemas import UserRead
 
 
 class PostBase(BaseModel):
@@ -10,7 +15,7 @@ class PostBase(BaseModel):
 class PostList(PostBase):
     id: int
     date: datetime
-
+    # user: UserRead = None
     class Config:
         orm_mode = True
 

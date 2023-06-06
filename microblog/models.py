@@ -17,8 +17,10 @@ class Post(Base):
     title = Column(String)
     text = Column(String(350))
     date = Column(DateTime,  index=True, default=datetime.utcnow)
-    user = Column(Integer, ForeignKey("user.id"))
-    user_id = relationship(User)
+    user_id = Column(Integer, ForeignKey("user.id"))
+    user = relationship(User, back_populates="posts", lazy="select")
+
+    __mapper_args__ = {"eager_defaults": True}
 
     @classmethod
     async def get(cls, session: AsyncSession, id: int):
@@ -26,6 +28,7 @@ class Post(Base):
             result = await session.get(cls, id)
         except NoResultFound:
             return None
+        print('+++++++++++++++', type(result))
         return result
 
     @classmethod

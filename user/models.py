@@ -6,6 +6,7 @@ from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
 from sqlalchemy import Column, String, Boolean, Integer, TIMESTAMP, ForeignKey
 from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import relationship
 
 from core.db import Base, get_db_session
 
@@ -20,6 +21,9 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_superuser: bool = Column(Boolean, default=False, nullable=False)
     is_verified: bool = Column(Boolean, default=False, nullable=False)
 
+    posts = relationship("Post", back_populates="user")
+
+    __mapper_args__ = {"eager_defaults": True}
 
 async def get_user_db(session: AsyncSession = Depends(get_db_session)):
     yield SQLAlchemyUserDatabase(session, User)

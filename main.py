@@ -29,6 +29,5 @@ async def db_session_middleware(request: Request, call_next):   #для созд
         request.state.db.close()
     return response
 
-
 app.include_router(routes)
 
