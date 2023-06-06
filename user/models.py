@@ -23,7 +23,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
 
     posts = relationship("Post", back_populates="user")
 
-    __mapper_args__ = {"eager_defaults": True}
+    # __mapper_args__ = {"eager_defaults": True}
 
 async def get_user_db(session: AsyncSession = Depends(get_db_session)):
     yield SQLAlchemyUserDatabase(session, User)

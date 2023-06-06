@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import relationship, Session, selectinload
 from core.db import Base
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from .exceptions import DuplicatedEntryError
@@ -18,22 +18,22 @@ class Post(Base):
     text = Column(String(350))
     date = Column(DateTime,  index=True, default=datetime.utcnow)
     user_id = Column(Integer, ForeignKey("user.id"))
-    user = relationship(User, back_populates="posts", lazy="select")
+    user = relationship(User, back_populates="posts", lazy="joined")
 
-    __mapper_args__ = {"eager_defaults": True}
+    # __mapper_args__ = {"eager_defaults": True}
 
     @classmethod
     async def get(cls, session: AsyncSession, id: int):
         try:
             result = await session.get(cls, id)
+            # result = await session.get(cls, id)
         except NoResultFound:
             return None
-        print('+++++++++++++++', type(result))
         return result
 
     @classmethod
     async def get_all(cls, session: AsyncSession):
-        return (await session.execute(select(Post))).scalars().all()
+        return (await session.execute(select(Post).order_by(cls.id))).scalars().all()  # .options(selectinload(cls.user)) внутри скобок метода execute для стягивания модели user при загрузке
 
     @classmethod
     async def create(cls, session: AsyncSession, item: PostCreate):

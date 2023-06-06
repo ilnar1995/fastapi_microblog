@@ -15,7 +15,7 @@ class PostBase(BaseModel):
 class PostList(PostBase):
     id: int
     date: datetime
-    # user: UserRead = None
+    user: UserRead = None
     class Config:
         orm_mode = True
 
