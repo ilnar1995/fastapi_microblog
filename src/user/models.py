@@ -8,7 +8,7 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship
 
-from core.db import Base, get_db_session
+from src.core.db import Base, get_db_session
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):

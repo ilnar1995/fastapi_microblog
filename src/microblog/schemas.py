@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic.datetime_parse import parse_datetime
 from sqlalchemy.orm import Relationship
 
-from user.schemas import UserRead
+from src.user.schemas import UserRead
 
 
 class PostBase(BaseModel):

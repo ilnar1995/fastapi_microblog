@@ -1,11 +1,13 @@
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from starlette.requests import Request
 from starlette.responses import Response
 #from core.db import SessionLocal
-from core.db import async_session_maker
+from src.core.db import async_session_maker
 
-from routes import routes
+from src.routes import routes
+from src.user.base_config import current_user
+from src.user.models import User
 
 app = FastAPI()
 
@@ -18,6 +20,11 @@ async def root():
 async def say_hello(name: str):
     return {"message": f"Hello {name}"}
 
+# приветствие пользователя
+@app.get("/protected-route")
+def protected_route(user: User = Depends(current_user)):
+    return f"Hello, {user.username}"
+
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):   #для создания сессии при каждом запросе в api
     response = Response("Internal server error", status_code=500)
@@ -28,6 +35,7 @@ async def db_session_middleware(request: Request, call_next):   #для созд
     finally:
         request.state.db.close()
     return response
+
 
 app.include_router(routes)
 

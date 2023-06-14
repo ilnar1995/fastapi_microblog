@@ -2,11 +2,11 @@ from datetime import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship, Session, selectinload
-from core.db import Base
+from src.core.db import Base
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from .exceptions import DuplicatedEntryError
-from microblog.schemas import PostCreate
-from user.models import User
+from src.microblog.schemas import PostCreate
+from src.user.models import User
 from sqlalchemy import select
 
 
@@ -59,3 +59,5 @@ class Post(Base):
     # @classmethod
     # def get_post_list(db: Session):  # для синхронной
     #     return db.query(Post).all()
+
+posts = Post.__table__
