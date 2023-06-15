@@ -41,6 +41,8 @@ class Post(Base):
     async def create(cls, session: AsyncSession, item: PostCreate):
         new_post = cls(**item.dict())
         session.add(new_post)       # добавление объекта в сеанс
+        # stmt = insert(cls).values(**item.dict()).returning(cls)
+        # new_post = await session.execute(stmt)
         try:
             await session.commit()  # чтоб транзакция завершилась
             await session.refresh(new_post)
