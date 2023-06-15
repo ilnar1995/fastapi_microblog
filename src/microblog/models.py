@@ -1,13 +1,13 @@
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import relationship, Session, selectinload
+from sqlalchemy.orm import relationship, Session, selectinload, joinedload
 from src.core.db import Base
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from .exceptions import DuplicatedEntryError
-from src.microblog.schemas import PostCreate
+from src.microblog.schemas import PostCreate, PostWithId
 from src.user.models import User
-from sqlalchemy import select
+from sqlalchemy import select, delete, update, insert
 
 
 class Post(Base):
@@ -25,28 +25,58 @@ class Post(Base):
     @classmethod
     async def get(cls, session: AsyncSession, id: int):
         try:
-            result = await session.get(cls, id)
             # result = await session.get(cls, id)
+            query = select(cls).where(cls.id == id).options(joinedload(cls.user)) # или надо posts.c.id == id если работаем через таблицу
+            result = (await session.execute(query)).scalar_one()
+            return result
         except NoResultFound:
             return None
-        return result
 
     @classmethod
     async def get_all(cls, session: AsyncSession):
-        return (await session.execute(select(Post).order_by(cls.id))).scalars().all()  # .options(selectinload(cls.user)) внутри скобок метода execute для стягивания модели user при загрузке
+        query = select(cls).order_by(cls.id)  # .options(selectinload(cls.user)) для стягивания модели user при загрузке
+        return (await session.execute(query)).scalars().all()
 
     @classmethod
     async def create(cls, session: AsyncSession, item: PostCreate):
         new_post = cls(**item.dict())
-        session.add(new_post)
+        session.add(new_post)       # добавление объекта в сеанс
         try:
-            await session.commit()
+            await session.commit()  # чтоб транзакция завершилась
             await session.refresh(new_post)
             return new_post
         except IntegrityError as ex:
             await session.rollback()
             raise DuplicatedEntryError("The post is already stored")
-        return new_post
+
+    @classmethod
+    async def update(cls, session: AsyncSession, item: PostCreate, id: int):
+        stmt = update(cls).where(cls.id == id).values(**item.dict()).returning(cls)
+        result = await session.execute(stmt)
+        try:
+            await session.commit()
+            return result.first()[0]
+        except IntegrityError as ex:
+            await session.rollback()
+            raise DuplicatedEntryError("Error")
+
+    @classmethod
+    async def delete(cls, session: AsyncSession, id: int):
+        query = select(cls).where(cls.id == id)
+        post = await session.execute(query)
+        try:
+            post = post.scalar_one()
+            await session.delete(post)
+            await session.commit()
+        except:
+            raise DuplicatedEntryError("The post is not founed")
+        # stmt = delete(cls, id).where(cls.id == id)
+        # await session.delete(stmt)
+        # try:
+        #     await session.commit()
+        # except:
+        #     return False
+        return True
 
     # @classmethod
     # def create_post(db: Session, item: PostCreate):  # для синхронной

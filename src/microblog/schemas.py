@@ -19,6 +19,12 @@ class PostList(PostBase):
     class Config:
         orm_mode = True
 
+class PostWithId(PostBase):
+    id: int
+    date: datetime
+    class Config:
+        orm_mode = True
+
     # @validator("date", pre=True)
     # def dt_validate(cls, date):
     #     date = parse_datetime(date)

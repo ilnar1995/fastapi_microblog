@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from src.core.db import get_db_session
-from .schemas import PostCreate, PostList
+from .schemas import PostCreate, PostList, PostBase, PostWithId
 from .models import Post
 
 router = APIRouter()
@@ -26,6 +26,11 @@ async def create_post(item: PostCreate, db: AsyncSession = Depends(get_db_sessio
     posts = await Post.create(db, item)
     return posts
 
+@router.patch('/post', response_model=PostWithId)
+async def create_post(id: int, item: PostCreate, db: AsyncSession = Depends(get_db_session)):
+    posts = await Post.update(db, item, id)
+    return posts
+
 @router.get("/post", response_model=PostList)
 async def get_post(id: int, db: AsyncSession = Depends(get_db_session)):
     post = await Post.get(db, id)
@@ -33,3 +38,9 @@ async def get_post(id: int, db: AsyncSession = Depends(get_db_session)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Object not found")
     return post
 
+@router.delete("/post")
+async def get_post(id: int, db: AsyncSession = Depends(get_db_session)):
+    post = await Post.delete(db, id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Object not found")
+    return {'status':'succsess'}

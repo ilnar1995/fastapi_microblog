@@ -1,13 +1,14 @@
 from fastapi import APIRouter
-from src.microblog import blog
+from src.microblog import router as blog_router
 from src.user.base_config import auth_backend, fastapi_users
 from src.user.schemas import UserRead, UserCreate
 
 routes = APIRouter()
 
 routes.include_router(
-    blog.router,
-    prefix="/blog"
+    blog_router.router,
+    prefix="/blog",
+    tags=["Blog"],
 )
 
 
